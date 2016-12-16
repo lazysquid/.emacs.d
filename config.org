@@ -581,7 +581,6 @@ http://endlessparentheses.com/embedding-youtube-videos-with-org-mode-links.html
                       path (or desc "video"))))))
 #+END_SRC
 
-
 * ELPA packages
 
 ** Acutex  
@@ -1117,6 +1116,41 @@ http://endlessparentheses.com/embedding-youtube-videos-with-org-mode-links.html
 #+END_SRC
 
 #+RESULTS:
+
+** Markdown mode
+   Credit for this setup
+   http://jblevins.org/projects/markdown-mode/
+   #+BEGIN_SRC emacs-lisp
+     (use-package markdown-mode
+       :ensure t
+       :commands (markdown-mode gfm-mode)
+       :mode (("README\\.md\\'" . gfm-mode)
+              ("\\.md\\'" . markdown-mode)
+              ("\\.markdown\\'" . markdown-mode))
+       :init (setq markdown-command "multimarkdown"))
+   #+END_SRC
+
+   | Command               | keybinding | Description          |
+   |-----------------------+------------+----------------------|
+   | Hpyerlink mnemonic    | C-c C-a    | Prefix for hpyerlink |
+   | Insert Hpyerlink      | C-c C-a l  | instert []()         |
+   | Insert reference link | C-c C-a L  | insert [][]          |
+   | Insert bare URL       | C-c C-a u  |                      |
+   | Insert foot note      | C-c C-a f  |                      |
+   | Insert inline link    | C-c C-a w  |                      |
+   |-----------------------+------------+----------------------|
+   | Image mnemonic        | C-c C-i    |                      |
+   | Insert image          | C-c C-i i  |                      |
+   | Insert image with ref | C-c C-i I  |                      |
+   |-----------------------+------------+----------------------|
+   | Style mnemonic        | C-c C-s    |                      |
+   | Insert blockquote     | C-c C-s b  |                      |
+   |                       | C-c C-s p  |                      |
+
+** Jekyll mode
+   #+BEGIN_SRC emacs-lisp
+   
+   #+END_SRC
 
 * C++ mode 
 

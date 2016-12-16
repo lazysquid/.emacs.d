@@ -5,7 +5,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (org-page helm-make gdb smooth-scrolling auctex srefactor glsl-mode aggressive-indent evil-args neotree doom-themes evil-matchit elpy magit flycheck-irony flycheck cmake-mode cmake-ide rtags yasnippet company-cmake company-irony-c-headers company-irony company-c-headers company helm-swoop helm-projectile helm-ag ranger helm evil-leader evil interleave org-plus-contrib org-tree-slide org-bullets org-download org-journal unicode-fonts darkokai-theme use-package)))
+    (markdown-mode gh-md jekyll-modes org-page helm-make gdb smooth-scrolling auctex srefactor glsl-mode aggressive-indent evil-args neotree doom-themes evil-matchit elpy magit flycheck-irony flycheck cmake-mode cmake-ide rtags yasnippet company-cmake company-irony-c-headers company-irony company-c-headers company helm-swoop helm-projectile helm-ag ranger helm evil-leader evil interleave org-plus-contrib org-tree-slide org-bullets org-download org-journal unicode-fonts darkokai-theme use-package)))
  '(safe-local-variable-values
    (quote
     ((TeX-master . t)
