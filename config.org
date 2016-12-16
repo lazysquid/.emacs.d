@@ -1,0 +1,1244 @@
+#+TITLE: Emacs Configuration
+#+AUTHOR: Wonjun Lee
+#+email: fpenguin23@gmail.com
+
+* Personal information
+
+#+BEGIN_SRC emacs-lisp
+  (setq user-full-name "Wonjun Lee"
+        user-mail-address "fpenguin23@gmail.com")
+#+END_SRC
+
+* Customize settings
+
+
+#+BEGIN_SRC emacs-lisp
+  (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+  (load custom-file)
+#+END_SRC
+
+* Theme
+
+#+BEGIN_SRC emacs-lisp
+  (use-package doom-themes
+    :ensure t
+    :init
+    ;; brighter source buffers
+    (add-hook 'find-file-hook 'doom-buffer-mode)
+    ;; brighter minibuffer when active
+    (add-hook 'minibuffer-setup-hook 'doom-brighten-minibuffer)
+    :config
+    (load-theme 'doom-one t)
+    ;; (setq org-fontify-whole-heading-line t
+    ;;       org-fontify-done-headline t
+    ;;       org-fontify-quote-and-verse-blocks t)
+    (use-package doom-neotree
+      :config
+      (setq doom-neotree-enable-file-icons t
+            doom-neotree-enable-folder-icons t))
+   )
+#+END_SRC
+
+#+RESULTS:
+: t
+
+#+BEGIN_SRC emacs-lisp
+  (use-package darkokai-theme
+    :ensure t
+    :config
+    :defer t
+    )
+#+END_SRC
+  
+#+BEGIN_SRC emacs-lisp
+  (defun switch-theme (theme)
+    "Disables any currently active themes and loads THEME."
+    ;; This interactive call is taken from `load-theme'
+    (interactive
+     (list
+      (intern (completing-read "Load custom theme: "
+                               (mapc 'symbol-name
+                                     (custom-available-themes))))))
+    (let ((enabled-themes custom-enabled-themes))
+      (mapc #'disable-theme custom-enabled-themes)
+      (load-theme theme t))
+    ;;(apply-org-beautify-theme)
+    )
+
+  (defun disable-active-themes ()
+    "Disables any currently active themes listed in `custom-enabled-themes'."
+    (interactive)
+    (mapc #'disable-theme custom-enabled-themes))
+
+  (bind-key "s-<f12>" 'switch-theme)
+  (bind-key "s-<f11>" 'disable-active-themes)
+
+#+END_SRC
+
+#+RESULTS:
+: disable-active-themes
+
+* Font
+** Global font lock mode
+Global Text fontification mode
+
+#+BEGIN_SRC emacs-lisp
+  (global-font-lock-mode t)
+#+END_SRC
+
+** Define fixed font family
+
+#+BEGIN_SRC emacs-lisp
+  (defvar fp/fixed-font-family
+    (cond
+     ((x-list-fonts "Source Code Pro") "Source Code Pro")
+     ((x-list-fonts "Hasklig")         "Hasklig")
+     ((x-list-fonts "Hack")         "Hack")
+     ((x-list-fonts "Monaco") "Monaco")
+     ((x-list-fonts "Anonymous Pro")   "Anonymous Pro")
+     ((x-list-fonts "Inconsolata") "Inconsolata"))
+    "My fixed width font based on what is installed, `nil' if not defined.")
+#+END_SRC
+
+** Fixed font family attribute settings
+
+#+BEGIN_SRC emacs-lisp
+  (when fp/fixed-font-family
+    (set-frame-font "Source Code Pro")
+    (set-face-attribute 'default nil :font fp/fixed-font-family :height 150)
+    (set-face-font 'default fp/fixed-font-family))
+#+END_SRC
+
+#+RESULTS:
+
+** Match proportional font and Non-proportional font
+
+#+BEGIN_SRC emacs-lisp
+  (defvar fp/variable-font-tuple
+    (cond ((x-list-fonts "Source Sans Pro") '(:font "Source Sans Pro"))
+          ((x-list-fonts "Lucida Grande")   '(:font "Lucida Grande"))
+          ((x-list-fonts "Verdana")         '(:font "Verdana"))
+          ((x-family-fonts "Sans Serif")    '(:family "Sans Serif"))
+          (nil (warn "Cannot find a Sans Serif Font.  Install Source Sans Pro.")))
+    "My variable width font available to org-mode files and whatnot.")
+#+END_SRC
+
+** What-font?
+
+This function let you know the face font.
+Alternatives use command C-u C-x =.
+<*
+
+#+BEGIN_SRC emacs-lisp
+  (defun what-face (pos)
+    (interactive "d")
+    (let ((face (or (get-char-property (point) 'read-face-name)
+                    (get-char-property (point) 'face))))
+      (if face (message "Face: %s" face) (message "No face at %d" pos))))
+#+END_SRC
+
+** Unicode font
+   반드시 디펜던시 코드를 설치 후 사용할 것.
+   디펜던시 코드는 깃허브 페이지에 들어있음.
+#+BEGIN_SRC emacs-lisp
+  (use-package unicode-fonts
+    :ensure t
+    :config
+    (unicode-fonts-setup))
+#+END_SRC
+
+** Fontawesome
+#+BEGIN_SRC emacs-lisp
+  (when (member "FontAwesome" (font-family-list))
+    (set-fontset-font t 'unicode "Symbola" nil 'prepend))
+#+END_SRC
+
+* Reload emacs
+
+#+BEGIN_SRC emacs-lisp
+  (defun reload-dotemacs()
+    (interactive)
+    (org-babel-load-file (concat user-emacs-directory "config.org")))
+#+END_SRC
+
+* Hangul setting
+
+#+BEGIN_SRC emacs-lisp
+  (set-language-environment "Korean")
+   (set-face-attribute 'default nil :height 130)
+   (set-fontset-font t 'hangul (font-spec :name "NanumGothic"))
+  (global-set-key (kbd "<kana>") 'toggle-input-method)
+#+END_SRC
+
+* Sane defualts
+
+#+BEGIN_SRC emacs-lisp
+  ;; make PC keyboard's Win key or other to type Super or Hyper, for emacs running on Windows.
+  (setq w32-pass-lwindow-to-system nil)
+  (setq w32-lwindow-modifier 'super) ; Left Windows key
+
+  (setq w32-pass-rwindow-to-system nil)
+  (setq w32-rwindow-modifier 'super) ; Right Windows key
+
+  (setq w32-pass-apps-to-system nil)
+  (setq w32-apps-modifier 'hyper) ; Menu/App key
+
+
+  ;; These functions are useful. Activate them.
+  (put 'downcase-region 'disabled nil)
+  (put 'upcase-region 'disabled nil)
+  (put 'narrow-to-region 'disabled nil)
+  (put 'dired-find-alternate-file 'disabled nil)
+
+  ;; Answering just 'y' or 'n' will do
+  (defalias 'yes-or-no-p 'y-or-n-p)
+
+  ;; Keep all backup and auto-save files in one directory
+  (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
+  (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
+
+  ;; Turn off the blinking cursor
+  (blink-cursor-mode -1)
+
+  (setq-default indent-tabs-mode nil)
+  (setq-default indicate-empty-lines t)
+
+  ;; Don't count two spaces after a period as the end of a sentence.
+  ;; Just one space is needed.
+  (setq sentence-end-double-space nil)
+
+  ;; delete the region when typing, just like as we expect nowadays.
+  (delete-selection-mode t)
+
+  (column-number-mode t)
+
+  (global-visual-line-mode)
+  (diminish 'visual-line-mode)
+
+  (setq uniquify-buffer-name-style 'forward)
+
+  ;; -i gets alias definitions from .bash_profile
+  (setq shell-command-switch "-ic")
+
+  ;; Don't beep at me
+  (setq visible-bell t)
+
+#+END_SRC
+
+#+RESULTS:
+: t
+
+* Visual line mode
+
+#+BEGIN_SRC emacs-lisp
+(global-visual-line-mode t)
+(setq fill-column 80)
+#+END_SRC
+
+* AutoFillMode
+
+All of these settings were stolen from https://www.emacswiki.org/emacs/AutoFillMode
+Without autofill mode. Bars are fill-column boundaries
+
+#+BEGIN_EXAMPLE
+    In text-mode, lines end when you    |
+    tell Emacs to end them.  RET is     |
+    bound to newline.  This will insert |
+    a line break.                       |
+#+END_EXAMPLE
+
+With autofill mode.
+#+BEGIN_EXAMPLE
+    In  text-mode, lines  end  when you |
+    tell  Emacs to  end  them.  RET  is |
+    bound to newline.  This will insert |
+    a line break.                       |
+#+END_EXAMPLE
+
+Turn on auto-fill mode only for text mode.
+
+#+BEGIN_SRC emacs-lisp
+    (add-hook 'text-mode-hook 'turn-on-auto-fill)
+#+END_SRC
+
+* Set dropbox directory
+
+#+BEGIN_SRC emacs-lisp
+  (setq fp/dropbox-directory
+        (cond
+         ((eq system-type 'windows-nt)
+          "D:/Dropbox")
+         ((eq system-type 'gnu/linux)
+          "~/Dropbox")))
+#+END_SRC
+
+#+RESULTS:
+: ~/Dropbox
+
+* Org mode
+  
+** Default sane
+#+BEGIN_SRC emacs-lisp
+  (use-package org
+    :ensure t
+    :config
+    (setq org-use-speed-commands t
+          org-src-fontify-natively t
+          org-src-tab-acts-natively t
+          org-hide-leading-stars t
+          org-special-ctrl-a/e t)
+    (setq org-hide-emphasis-markers nil)
+    (setq org-image-actual-width 550)
+    ;; (setq org-export-coding-system 'utf-8) 
+    (setq org-directory (concat fp/dropbox-directory "/org"))
+    (setq org-log-done 'time))
+#+END_SRC
+
+** Capture
+#+BEGIN_SRC emacs-lisp
+  (defun fp/org-get-target-headline (&optional prompt)
+    "Prompt for a location in an org file and jump to it.
+
+  This is for promping for refile targets when doing captures."
+      (let* ((target (save-excursion
+                       (org-refile-get-location prompt nil nil t)))
+             (file (nth 1 target))
+             (pos (nth 3 target))
+             )
+      (with-current-buffer (find-file-noselect file)
+          (goto-char pos)
+          (org-end-of-subtree)
+          (org-return)
+      )))
+  ;;http://stackoverflow.com/questions/9005843/interactively-enter-headline-under-which-to-place-an-entry-using-capture
+  ;; http://emacs.stackexchange.com/questions/5923/org-capture-how-to-choose-the-target-file-at-the-end-of-the-process
+  (setq org-capture-templates
+        '(("t" "Todo item" entry (file+headline (concat org-directory "/refile.org") "todo")
+           "* %^{Title} %(org-set-tags)  \n:PROPERTIES:\n:Created: %U\n:END:\n%i\nBrief description:\n%?"
+           :created t
+           :empty-lines 1
+           :prepend t
+           )
+
+          ("j" "Journal entry"
+           entry (file+datetree (concat org-directory "/journal.org"))
+           "* %<%H:%M> %?"
+           :clock-in t :clock-resume t :empty-lines 1)
+
+          ("n"               ; key
+           "Notes link"         ; name
+           entry             ; type
+           (file+function (concat org-directory "/notes.org") fp/org-get-target-headline)  ; target
+           "* %^{Title} %(org-set-tags)  :article: \n:PROPERTIES:\n:Created: %U\n:Linked: %A\n:END:\n%i\nBrief description:\n%?"  ; template
+           :prepend t        ; properties
+           :empty-lines 1    ; properties
+           :created t        ; properties
+           )
+          )
+        )
+#+END_SRC
+
+#+RESULTS:
+| t | Todo item | entry | (file+headline (concat org-directory /refile.org) todo) | * %^{Title} %(org-set-tags) |
+
+** Agenda
+
+#+BEGIN_SRC emacs-lisp
+  (use-package org-agenda
+    :after org
+    :bind
+    :config
+    (setq org-agenda-start-on-weekday t
+          org-agenda-diary-file (concat org-directory "/diary.org")))
+#+END_SRC
+
+** Org-Journal
+
+Let's make daily journal everyday and register them to agenda files.
+#+BEGIN_SRC emacs-lisp
+  (use-package org-journal
+    :ensure t
+    :config
+    (setq org-journal-dir (concat org-directory "/daily-plan/"))
+    (setq org-agenda-files
+          (append org-agenda-files
+                  (list (expand-file-name org-journal-dir)))))
+#+END_SRC
+
+** Org-download
+
+#+BEGIN_SRC emacs-lisp
+  (use-package org-download
+    :ensure t
+    :after org
+    :config
+    (setq org-download-method 'attach))
+#+END_SRC
+
+** Org-ref
+    
+** Org-babel
+
+#+BEGIN_SRC emacs-lisp
+  (use-package org
+    :config
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((sh         . t)
+       (emacs-lisp . t)
+       (python     . t)
+       (dot        . t)
+       (C          . t)
+       (plantuml   . t))))
+#+END_SRC
+** Org-bullets
+#+BEGIN_SRC emacs-lisp
+  (use-package org-bullets
+    :ensure t
+    :config
+    (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+    (setq org-bullets-bullet-list
+          '("◉" "●" "•" "✸" "►" "◇"))
+    (setq org-ellipsis " ↴"))
+#+END_SRC
+    
+** Org-tree-slides
+#+BEGIN_SRC emacs-lisp
+  (use-package org-tree-slide
+    :ensure t
+    :config
+    (global-set-key (kbd "<f8>") 'org-tree-slide-mode)
+    (global-set-key (kbd "S-<f8>") 'org-tree-slide-skip-done-toggle))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Org-beautify
+
+   #+BEGIN_SRC emacs-lisp
+     (deftheme org-beautify-theme "Sub-theme to beautify org mode")
+     (defun apply-org-beautify-theme () 
+       "apply org beautifly"
+       (interactive)
+       (let* ((sans-font (cond
+                          ((x-list-fonts "Verdana") '(:font "Verdana"))
+                          ((x-list-fonts "Lucida Grande") '(:font "Lucida Grande"))
+                          ((x-family-fonts "Sans Serif") '(:family "Sans Serif"))
+                          (nil (warn "Cannot find a Sans Serif Font.  Please report at: https://github.com/jonnay/emagicians-starter-kit/issues"))))
+              (my-font (cond
+                        ((x-list-fonts "Helvetica nenu") '(:font "Helvetica nenu"))
+                        ((x-list-fonts "Liberation Sans") '(:font "Liberation Sans"))
+                        ((x-list-fonts "Verdana") '(:font "Verdana"))
+                        ((x-list-fonts "Hack") '(:font "Hack"))
+                        ((x-family-fonts "Helvetica nenu") '(:font "Helvetica nenu")))
+
+
+                       ;;((x-family-fonts "Sans Serif") '(:font "Sans Serif")))
+                       )
+
+              (base-font-color (face-foreground 'default  nil 'default))
+              (background-color (face-background 'default nil 'default))
+              (headline `(:inherit default :weight bold))
+              ;; if you want to get back to white headline use uncomment below line
+              ;;(headline `(:inherit default :weight bold :foreground ,base-font-color))
+              (primary-color (face-foreground 'mode-line nil))
+
+              (secondary-color (face-background 'secondary-selection nil 'region))
+              (padding `(:line-width 5 :color ,background-color))
+              (org-highlights `(:foreground ,base-font-color :background ,secondary-color))
+              )
+         (custom-theme-set-faces 'org-beautify-theme
+                                 `(org-agenda-structure ((t (:inherit default ,@my-font :height 2.0 :underline nil))))
+                                 `(org-level-8 ((t ,headline)))
+                                 `(org-level-7 ((t ,headline)))
+                                 `(org-level-6 ((t ,headline)))
+                                 `(org-level-5 ((t ,headline)))
+                                 `(org-level-4 ((t ,headline)))
+                                 `(org-level-3 ((t (,@headline  :box ,padding :height 1.2))))
+                                 `(org-level-2 ((t (,@headline ,@my-font :height 1.2 :box ,padding))))
+                                 `(org-level-1 ((t (,@headline ,@my-font :height 1.2 :box ,padding))))
+                                 `(org-document-title ((t (:inherit org-level-1 :height 1.5 :underline nil :box ,padding))))
+
+                                 `(org-block ((t (:foreground ,base-font-color :background ,background-color :box nil))))
+                                 ;;`(org-block-begin-line ((t , org-highlights)))
+                                 ;;`(org-block-end-line ((t , org-highlights))) 
+
+                                 `(org-checkbox ((t (:foreground "#000000", :background "#93a1a1" :box (:line-width -3 :color "#93a1a1" :style "released-button")))))
+
+                                 `(org-headline-done ((t (:strike-through t))))
+                                 `(org-done ((t (:strike-through t))))
+                                 )))
+
+     (add-hook 'org-mode-hook
+             (lambda () (apply-org-beautify-theme)))
+   #+END_SRC
+
+** Org-plust-contrib
+
+#+BEGIN_SRC emacs-lisp
+
+  (use-package org-plus-contrib
+    :ensure t
+    :config
+    (require 'ob)
+    (require 'ob-C)
+    (require 'ob-tangle)
+    (require 'ob-emacs-lisp)
+    (require 'ob-sh)
+    (require 'ox-latex)
+    (require 'ox-html))
+
+#+END_SRC
+** Interleaved
+
+#+BEGIN_SRC emacs-lisp
+  (use-package interleave
+    :ensure t)
+#+END_SRC
+** Org-page
+#+BEGIN_SRC emacs-lisp
+  (use-package org-page
+    :config
+    (setq op/repository-directory "~/Dropbox/Blog/")
+    (setq op/site-domain "frostedpenguin.github.com")
+    (setq op/personal-github-link "http://github.com/frostedpenguin")
+    (setq op/personal-google-analytics-id "UA-86199041-1")
+    (setq op/personal-avatar "https://avatars2.githubusercontent.com/u/6973543?v=3&s=466")
+    (setq op/site-main-title "Span {thought}")
+    (setq op/site-sub-title "Set of my orthogonal thoughts")
+    (setq op/category-ignore-list
+          '("images"))
+    (setq op/category-config-alist
+          '(("wiki"
+             :show-meta t
+             :show-comment nil
+             :uri-generator op/generate-uri
+             :uri-template "/wiki/%t/"
+             :sort-by :mod-date
+             :category-index t)
+
+            ("demoreel"
+             :show-meta t
+             :show-comment nil
+             :uri-generator op/generate-uri
+             :uri-template "/demoreel/%t/"
+             :sort-by :mod-date
+             :category-index t)
+
+            ("blog" ;; this is the default configuration
+             :show-meta t
+             :show-comment nil
+             :uri-generator op/generate-uri
+             :uri-template "/blog/%y/%m/%d/%t/"
+             :sort-by :date     ;; how to sort the posts
+             :category-index t) ;; generate category index or not
+
+            ("index"
+             :show-meta nil
+             :show-comment nil
+             :uri-generator op/generate-uri
+             :uri-template "/"
+             :sort-by :date
+             :category-index nil)
+
+            ("about"
+             :show-meta nil
+             :show-comment nil
+             :uri-generator op/generate-uri
+             :uri-template "/about/"
+             :sort-by :date
+             :category-index nil)
+            )))
+#+END_SRC
+
+#+RESULTS:
+: t
+*** Embeding youtube video
+
+http://endlessparentheses.com/embedding-youtube-videos-with-org-mode-links.html
+
+#+BEGIN_SRC emacs-lisp
+  (defvar yt-iframe-format
+    ;; You may want to change your width and height.
+    (concat "<iframe width=\"640\""
+            " height=\"360\""
+            " src=\"https://www.youtube.com/embed/%s\""
+            " frameborder=\"0\""
+            " allowfullscreen>%s</iframe>"))
+
+  (org-add-link-type
+   "yt"
+   (lambda (handle)
+     (browse-url
+      (concat "https://www.youtube.com/embed/"
+              handle)))
+   (lambda (path desc backend)
+     (cl-case backend
+       (html (format yt-iframe-format
+                     path (or desc "")))
+       (latex (format "\href{%s}{%s}"
+                      path (or desc "video"))))))
+#+END_SRC
+
+
+* ELPA packages
+
+** Acutex  
+
+#+BEGIN_SRC emacs-lisp
+  ;; https://github.com/Schnouki/dotfiles/blob/master/emacs/init-20-tex.el this snippets from here
+  ;; Basic settings
+  (use-package auctex
+    :ensure t
+    :mode ("\\.tex\\'" . latex-mode)
+    :commands (latex-mode LaTeX-mode plain-tex-mode)
+    :init
+    (progn
+      (add-hook 'LaTeX-mode-hook #'LaTeX-preview-setup)
+      (add-hook 'LaTeX-mode-hook #'flyspell-mode)
+      (add-hook 'LaTeX-mode-hook #'turn-on-reftex)
+      (setq TeX-auto-save t
+            TeX-parse-self t
+            TeX-save-query nil
+            TeX-PDF-mode t)
+  (setq-default TeX-master nil)))
+#+END_SRC
+
+#+RESULTS:
+
+** Evil
+   
+#+BEGIN_SRC emacs-lisp
+  (use-package evil
+    :ensure t
+    :config
+    (evil-mode 1)
+    (loop for (mode . state) in '(
+                                  (shell-mode . emacs)
+                                  (git-commit-mode . insert)
+                                  (neotree-mode . emacs)
+                                  (git-rebase-mode . emacs)
+                                  (magit-mode . emacs)
+                                  (srefactor-ui-menu-mode . emacs)
+                                  (help-mode . emacs)
+                                  (term-mode . emacs)
+                                  (dired-mode . emacs)
+                                  (ranger-mode . insert)
+                                  (grep-mode . emacs))
+          do (evil-set-initial-state mode state))
+    )
+
+
+#+END_SRC
+
+#+RESULTS:
+: t
+
+*** Evil-sniper 
+** Evil-args
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-args
+    :ensure t
+    :config
+    (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
+    (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
+
+
+    ;; bind evil-forward/backward-args
+    (define-key evil-normal-state-map "]" 'evil-forward-arg)
+    (define-key evil-normal-state-map "[" 'evil-backward-arg)
+    (define-key evil-motion-state-map "]" 'evil-forward-arg)
+    (define-key evil-motion-state-map "[" 'evil-backward-arg)
+
+    ;; bind evil-jump-out-args
+    (define-key evil-normal-state-map "=" 'evil-jump-out-args)
+    )
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Evil-leader 
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-leader
+    :ensure t
+    :init
+    (global-evil-leader-mode)
+    :config
+    (setq fp/evil-leader-prefix-helm ""
+          fp/evil-leader-prefix-company ""
+          fp/evil-leader-prefix-yasnippet ""
+          fp/evil-leader-prefix-projectile "")
+
+    (evil-leader/set-leader "<SPC>")
+    (evil-leader/set-key
+      ;; Reload my configs
+      "feR" 'reload-dotemacs
+
+      ;; My file manager 
+      "]" 'ranger
+      ;; Helm
+      "hf" 'helm-find-files
+
+      ;; Rtags
+      "rr" 'rtags-find-symbol-at-point
+      "re" 'rtags-location-stack-back
+      "rw" 'rtags-location-stack-forward
+      "rt" 'rtags-find-virtuals-at-point
+      "r/" 'rtags-preprocess-file
+      "rs" 'rtags-symbol-type
+      "rc" 'rtags-rename-symbol
+    
+    
+      ;; cmake-ide
+      "cc" 'cmake-ide-compile
+      "cv" 'cmake-ide-run-cmake
+    
+      ;; Magit
+      "mi" 'magit-init
+      "ms" 'magit-status
+
+      ;; Orgmode stuffs
+      "osl" 'org-store-link
+      "oc"  'org-capture
+      "oa"  'org-agenda
+
+
+      ;; Helm-ag key setup 
+      "hag" 'helm-do-grep-ag
+      "hap" 'helm-do-ag-project-root
+      "hab" 'helm-do-ag-buffers
+      "hat" 'helm-do-ag-this-file
+      "hac" 'helm-ag-clear-stack
+      "haj" 'helm-ag-pop-stack
+
+      "b" 'switch-to-buffer
+      "B" 'list-buffers 
+      "k" 'kill-buffer
+      "z" 'text-scale-adjust)
+
+    )
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Ranger
+#+BEGIN_SRC emacs-lisp
+  (use-package ranger
+    :ensure t)
+
+#+END_SRC
+
+#+RESULTS:
+
+** Helm
+
+#+BEGIN_SRC emacs-lisp
+  (use-package helm
+    :ensure t
+    :diminish helm-mode
+    :init
+    (use-package helm-config)
+    (helm-mode)
+    :config
+    :bind
+    (("C-c h" . Helm-command-prefix)
+     ("C-x b" . helm-mini)
+     ("C-`" . helm-resume)
+     ("M-x" . helm-M-x)
+     ("M-y" . helm-show-kill-ring)
+     ("C-x C-f" . helm-find-files)))
+#+END_SRC
+
+#+RESULTS:
+
+** Helm-ag
+
+#+BEGIN_SRC emacs-lisp
+  (use-package helm-ag
+    :config
+    (setq helm-ag-fuzzy-match t)
+    :ensure t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Helm-projectile
+
+#+BEGIN_SRC emacs-lisp
+  (use-package helm-projectile
+    :after (helm projectile)
+    :ensure t
+    :bind ("C-x p" . helm-projectile)
+    :commands helm-projectile)
+#+END_SRC
+** Helm-swoop
+
+#+BEGIN_SRC emacs-lisp
+  (use-package helm-swoop
+    :ensure t
+    :after helm
+    )
+
+#+END_SRC
+
+#+RESULTS:
+: helm-swoop
+
+** Projectile
+
+#+BEGIN_SRC emacs-lisp
+  (use-package projectile
+    :ensure t
+    :diminish projectile-mode
+    :commands projectile-mode
+    :config
+    (progn
+      (projectile-global-mode t)
+      (setq projectile-indexing-method 'alien)
+      (setq projectile-enable-caching t)))
+#+END_SRC
+
+** Company
+   
+#+BEGIN_SRC emacs-lisp
+  (use-package company
+    :ensure t
+    :init
+    ;; (add-hook 'prog-mode-hook 'company-mode)
+    ;; (add-hook 'c-mode-hook 'company-mode)
+    ;; (add-hook 'c++-mode-hook 'company-mode)
+    ;; (add-hook 'org-mode-hook #'global-company-mode)
+    (global-company-mode)
+    :config
+    (setq company-idle-delay 0.02)
+    (setq company-minimum-prefix-length 1)
+    (setq company-show-numbers t)
+    (setq company-selection-wrap-around t)
+    (setq company-transformers '(company-sort-by-occurrence company-sort-by-backend-importance))
+    (setq company-tooltip-limit 20)
+    (setq company-dabbrev-downcase nil)
+    (setq company-dabbrev-ignore-case t)
+    (setq company-dabbrev-code-ignore-case t)
+    (setq company-dabbrev-code-everywhere t)
+    (setq company-dabbrev-minimum-length 5)
+    )
+
+
+  (defun fp/org-mode-hook ()
+    (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t)
+    (delete 'company-dabbrev company-backends)
+    )
+  (add-hook 'org-mode-hook #'fp/org-mode-hook)
+
+#+END_SRC
+
+
+*** Company-c-headers
+
+#+BEGIN_SRC emacs-lisp
+  (use-package company-c-headers
+    :ensure t
+    :after (company)
+    :config
+    (add-to-list 'company-backends 'company-c-headers))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+*** Company-irony
+
+#+BEGIN_SRC emacs-lisp
+  (use-package company-irony
+    :ensure t
+    :after (company irony)
+    :config
+    (setq company-irony-ignore-case t)
+    :init
+    (add-to-list 'company-backends 'company-irony))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+*** Company-irony-c-headers
+
+#+BEGIN_SRC emacs-lisp
+  (use-package company-irony-c-headers
+    :ensure t
+    :after (irony company company-irony)
+    :init
+    (add-to-list 'company-backends 'company-irony-c-headers))
+#+END_SRC
+
+*** Company-flx
+*** Company-cmake 
+#+BEGIN_SRC emacs-lisp
+(use-package company-cmake
+  :ensure t)
+#+END_SRC
+
+#+RESULTS:
+
+** Yasnippet
+
+#+BEGIN_SRC emacs-lisp
+  (use-package yasnippet
+    :ensure t
+    :config
+    (yas-global-mode 1))
+#+END_SRC
+   
+** Irorny
+
+#+BEGIN_SRC emacs-lisp
+  (use-package irony
+    :ensure t
+    :init
+    (add-hook 'c++-mode-hook 'irony-mode)
+    (add-hook 'c-mode-hook 'irony-mode)
+    (add-hook 'objc-mode-hook 'irony-mode))
+
+  ;; replace the `completion-at-point' and `complete-symbol' bindings in
+  ;; irony-mode's buffers by irony-mode's function
+  (defun my-irony-mode-hook ()
+    (define-key irony-mode-map [remap completion-at-point]
+      'irony-completion-at-point-async)
+    (define-key irony-mode-map [remap complete-symbol]
+      'irony-completion-at-point-async))
+  (add-hook 'irony-mode-hook 'my-irony-mode-hook)
+  (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+#+END_SRC
+
+#+RESULTS:
+| irony-cdb-autosetup-compile-options | my-irony-mode-hook |
+
+** RTags
+
+#+BEGIN_SRC emacs-lisp
+  (use-package rtags
+    :ensure t
+    :config
+    (setq rtags-use-helm t)
+   )
+#+END_SRC
+
+** Cmake-ide
+
+#+BEGIN_SRC emacs-lisp
+  (use-package cmake-ide
+    :ensure t
+    :config
+    (cmake-ide-setup))
+
+#+END_SRC
+
+#+RESULTS:
+
+** Cmake-mode
+#+BEGIN_SRC emacs-lisp
+  (use-package cmake-mode
+    :ensure t)
+#+END_SRC
+
+#+RESULTS:
+
+** Flycheck
+
+#+BEGIN_SRC emacs-lisp
+  (use-package flycheck
+    :ensure t
+    :config
+    (global-flycheck-mode))
+#+END_SRC
+
+*** Flycheck-irony
+#+BEGIN_SRC emacs-lisp
+  (use-package flycheck-irony
+    :after (irony flycheck)
+    :ensure t
+    :config
+    (add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
+#+END_SRC
+** GLSL mode
+   #+BEGIN_SRC emacs-lisp
+     (use-package glsl-mode
+       :ensure t
+       :init
+       (append auto-mode-alist '('("\\.glsl\\'" . glsl-mode)
+                                 '("\\.vert\\'" . glsl-mode)
+                                 '("\\.frag\\'" . glsl-mode)
+     '("\\.geom\\'" . glsl-mode))))
+
+   #+END_SRC
+
+   #+RESULTS:
+
+** Magit
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+    :commands magit-mode
+    :ensure t)
+#+END_SRC
+
+#+RESULTS:
+
+** Elpy
+
+#+BEGIN_SRC emacs-lisp
+    (use-package elpy
+      :ensure t
+      :init
+  ;;    (setenv "PYTHONPATH" "/usr/bin/python")
+      (elpy-enable)
+      (setq elpy-rpc-backend "jedi"))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+*** Evil-matchit
+
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-matchit
+    :ensure t
+    :init
+    (global-evil-leader-mode 1))
+  
+
+#+END_SRC
+
+#+RESULTS:
+
+** Neotree
+
+#+BEGIN_SRC emacs-lisp
+  (use-package neotree
+    :ensure t
+    :config
+    (global-set-key [f8] 'neotree-toggle))
+
+#+END_SRC
+
+#+RESULTS:
+: t
+
+*** Neotree patch
+#+BEGIN_SRC emacs-lisp
+  (with-eval-after-load "neotree"
+    (defun neo-buffer--insert-fold-symbol (name &optional file-name)
+    "Custom overriding function for the fold symbol.
+  `NAME' decides what fold icon to use, while `FILE-NAME' decides
+  what file icon to use."
+    (or (and (equal name 'open)  (insert (all-the-icons-icon-for-dir file-name "down")))
+        (and (equal name 'close) (insert (all-the-icons-icon-for-dir file-name "right")))
+        (and (equal name 'leaf)  (insert (format "\t\t\t%s\t" (all-the-icons-icon-for-file file-name))))))
+
+    (defun neo-buffer--insert-dir-entry (node depth expanded)
+    (let ((node-short-name (neo-path--file-short-name node)))
+      (insert-char ?\s (* (- depth 1) 2)) ; indent
+      (when (memq 'char neo-vc-integration)
+        (insert-char ?\s 2))
+      (neo-buffer--insert-fold-symbol
+       (if expanded 'open 'close) node)
+      (insert-button (concat node-short-name "/")
+                     'follow-link t
+                     'face neo-dir-link-face
+                     'neo-full-path node
+                     'keymap neotree-dir-button-keymap)
+      (neo-buffer--node-list-set nil node)
+      (neo-buffer--newline-and-begin)))
+
+  (defun neo-buffer--insert-file-entry (node depth)
+    (let ((node-short-name (neo-path--file-short-name node))
+          (vc (when neo-vc-integration (neo-vc-for-node node))))
+      (insert-char ?\s (* (- depth 1) 2)) ; indent
+      (when (memq 'char neo-vc-integration)
+        (insert-char (car vc))
+        (insert-char ?\s))
+      (neo-buffer--insert-fold-symbol 'leaf node-short-name)
+      (insert-button node-short-name
+                     'follow-link t
+                     'face (if (memq 'face neo-vc-integration)
+                               (cdr vc)
+                             neo-file-link-face)
+                     'neo-full-path node
+                     'keymap neotree-file-button-keymap)
+      (neo-buffer--node-list-set nil node)
+      (neo-buffer--newline-and-begin))))
+
+#+END_SRC
+** All the icon
+
+#+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons
+    :ensure t)
+#+END_SRC
+
+#+RESULTS:
+** Smooth scrolling
+
+#+BEGIN_SRC emacs-lisp
+  (use-package smooth-scrolling
+    :ensure t
+    :config
+    (smooth-scrolling-mode 1))
+
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Semantic refactor
+#+BEGIN_SRC emacs-lisp
+  (use-package srefactor
+    :ensure t
+    :config
+    (semantic-mode 1)
+    (evil-leader/set-key-for-mode 'c++-mode "ss" 'srefactor-refactor-at-point)
+    (evil-leader/set-key-for-mode 'c-mode "ss" 'srefactor-refactor-at-point))
+  (use-package srefactor-lisp
+    :config
+    (semantic-mode 1))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Helm-make
+#+BEGIN_SRC emacs-lisp
+  (use-package helm-make)
+
+
+#+END_SRC
+
+#+RESULTS:
+
+* C++ mode 
+
+#+BEGIN_SRC emacs-lisp
+  (define-key c-mode-base-map (kbd "RET") 'newline-and-indent)
+  (setq c-default-style
+        '((c-mode . "bsd")
+          (cc-mode . "bsd")
+          (c++-mode . "bsd")
+          (java-mode . "java")
+          (awk-mode . "awk")
+          (other . "gnu")))
+  (setq c-basic-offset 4)
+  (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
+#+END_SRC
+
+** Spacemacs config
+add this in layer
+(c-c++ :variables c-c++-enable-clang-support t)
+auto-completion
+syntax-checking
+
+.clang_complete at root of proejct
+
+in build folder run
+CXX='cc_args.py g++' cmake .. -Dsomething
+after that
+make
+
+in terminal
+find . | ag clang_complete | xargs cat | sort | uniq >
+path/to/project/root/.clang_complete
+
+spc-t-s syntax checker on
+
+
+ycmd is rival of clang..
+ycmd layer
+
+#+BEGIN_SRC emacs-lisp
+  ;; (put 'helm-make-build-dir 'safe-local-variable 'striasdfngp)
+  ;; (push '("C" "h") projectile-other-file-alist)
+#+END_SRC
+
+* GDB
+#+BEGIN_SRC emacs-lisp
+    (setq gdb-many-windows t
+          gdb-show-main t)
+#+END_SRC
+
+* Semantic
+#+BEGIN_SRC emacs-lisp
+  (use-package semantic
+    :config
+    (evil-leader/set-key-for-mode 'c++-mode "sh" 'helm-semantic-or-imenu))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+* Misc
+** Zoom in/out
+
+Bind to C-x C-+ to easy key bindings.
+#+BEGIN_SRC emacs-lisp
+  (defvar original-font-size nil)
+
+  (defun adjust-font-size (delta)
+    (let* ((old-size (face-attribute 'default :height))
+           (new-size (max (max delta (- delta)) (min 200 (+ delta old-size)))))
+      (setq original-font-size (or original-font-size old-size))
+      (set-face-attribute 'default nil :height new-size)
+      (message "Font size set to %d (was %d)" (face-attribute 'default :height) old-size)))
+
+  (defun zoom-in ()
+    (interactive)
+    (adjust-font-size +20))
+
+  (defun zoom-out ()
+    (interactive)
+    (adjust-font-size -20))
+
+  (defun zoom-reset ()
+    (interactive)
+    (when original-font-size
+      (set-face-attribute 'default nil :height original-font-size)))
+  (global-set-key (kbd "C-+") 'zoom-in)
+  (global-set-key (kbd "C--") 'zoom-out)
+  (global-set-key (kbd "C-0") 'zoom-reset)
+
+
+  ;; Zoom in/out
+
+  ;; (global-set-key (kbd "C-+") 'text-scale-increase)
+  ;; (global-set-key (kbd "C--") 'text-scale-decrease)
+#+END_SRC
+
+#+RESULTS:
+: zoom-reset
+
+** Coding system
+#+BEGIN_SRC emacs-lisp
+  (prefer-coding-system 'utf-8)
+  (set-default-coding-systems 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+  (set-buffer-file-coding-system 'utf-8)
+  (set-clipboard-coding-system 'utf-8)
+  ;; backwards compatibility as default-buffer-file-coding-system
+  ;; is deprecated in 23.2.
+  (if (boundp 'buffer-file-coding-system)
+      (setq-default buffer-file-coding-system 'utf-8)
+    (setq default-buffer-file-coding-system 'utf-8))
+
+  ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
+  (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
+  (set-language-environment "UTF-8")
+
+
+#+END_SRC
+
+#+RESULTS:
+: t
+
+

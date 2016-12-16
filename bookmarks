@@ -1,0 +1,10 @@
+;;;; Emacs Bookmark Format Version 1 ;;;;
+;;; This format is meant to be slightly human-readable;
+;;; nevertheless, you probably don't want to edit it.
+;;; -*- End Of Bookmark File Format Version Stamp -*-
+(("ranger-k"
+ (filename . "~/Dropbox/Code Factory/Color/ColorBalancing/src/")
+ (front-context-string)
+ (rear-context-string . " 6  9월 25 02:08 ")
+ (position . 221))
+)
