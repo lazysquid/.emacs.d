@@ -22,13 +22,14 @@
 #+BEGIN_SRC emacs-lisp
   (use-package doom-themes
     :ensure t
+    :defer t
     :init
     ;; brighter source buffers
     (add-hook 'find-file-hook 'doom-buffer-mode)
     ;; brighter minibuffer when active
     (add-hook 'minibuffer-setup-hook 'doom-brighten-minibuffer)
     :config
-    (load-theme 'doom-one t)
+  ;;  (load-theme 'doom-one t)
     ;; (setq org-fontify-whole-heading-line t
     ;;       org-fontify-done-headline t
     ;;       org-fontify-quote-and-verse-blocks t)
@@ -46,9 +47,13 @@
   (use-package darkokai-theme
     :ensure t
     :config
-    :defer t
+    (load-theme 'darkokai t)
     )
 #+END_SRC
+
+#+RESULTS:
+: t
+
   
 #+BEGIN_SRC emacs-lisp
   (defun switch-theme (theme)
@@ -286,13 +291,18 @@ Turn on auto-fill mode only for text mode.
           org-src-fontify-natively t
           org-src-tab-acts-natively t
           org-hide-leading-stars t
+          org-startup-indented t
           org-special-ctrl-a/e t)
     (setq org-hide-emphasis-markers nil)
     (setq org-image-actual-width 550)
     ;; (setq org-export-coding-system 'utf-8) 
     (setq org-directory (concat fp/dropbox-directory "/org"))
+    (plist-put org-format-latex-options :scale 1.5);; i want bigger latex fragment
     (setq org-log-done 'time))
 #+END_SRC
+
+#+RESULTS:
+: t
 
 ** Capture
 #+BEGIN_SRC emacs-lisp
@@ -320,6 +330,16 @@ Turn on auto-fill mode only for text mode.
            :prepend t
            )
 
+          ("a"               ; key
+           "Article"         ; name
+           entry             ; type
+           (file+headline (concat fp/dropbox-directory "/note/research.org") "Article")  ; target
+           "* %^{Title} %(org-set-tags)  :article: \n:PROPERTIES:\n:Created: %U\n:Linked: %A\n:END:\n%i\nBrief description:\n%?"  ; template
+           :prepend t        ; properties
+           :empty-lines 1    ; properties
+           :created t        ; properties
+           )
+        
           ("j" "Journal entry"
            entry (file+datetree (concat org-directory "/journal.org"))
            "* %<%H:%M> %?"
@@ -376,7 +396,17 @@ Let's make daily journal everyday and register them to agenda files.
 #+END_SRC
 
 ** Org-ref
-    
+
+#+BEGIN_SRC emacs-lisp
+  ;;  (use-package org-ref
+  ;;    :ensure t
+  ;;    :config
+      (setq org-ref-bibliography-notes (concat fp/dropbox-directory "/note/research.org")
+            org-ref-default-bibliography (concat fp/dropbox-directory "/note/ref.bib")
+            org-ref-pdf-directory (concat fp/dropbox-directory "/note/pdf"))
+
+#+END_SRC
+   
 ** Org-babel
 
 #+BEGIN_SRC emacs-lisp
