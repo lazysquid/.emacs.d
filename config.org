@@ -421,6 +421,10 @@ Let's make daily journal everyday and register them to agenda files.
        (C          . t)
        (plantuml   . t))))
 #+END_SRC
+
+#+RESULTS:
+: t
+
 ** Org-bullets
 #+BEGIN_SRC emacs-lisp
   (use-package org-bullets
@@ -610,6 +614,16 @@ http://endlessparentheses.com/embedding-youtube-videos-with-org-mode-links.html
        (latex (format "\href{%s}{%s}"
                       path (or desc "video"))))))
 #+END_SRC
+** Org-ioslide
+#+BEGIN_SRC emacs-lisp
+  (use-package ox-ioslide
+    :ensure t
+    :config
+    (use-package ox-ioslide-helper))
+#+END_SRC
+
+#+RESULTS:
+: t
 
 * ELPA packages
 
@@ -654,7 +668,10 @@ http://endlessparentheses.com/embedding-youtube-videos-with-org-mode-links.html
                                   (term-mode . emacs)
                                   (dired-mode . emacs)
                                   (ranger-mode . insert)
+                                  (ioslide-helper-menus . emacs)
+                                  (makey-key-mode . emacs)
                                   (grep-mode . emacs))
+
           do (evil-set-initial-state mode state))
     )
 
