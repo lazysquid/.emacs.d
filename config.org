@@ -306,56 +306,58 @@ Turn on auto-fill mode only for text mode.
 
 ** Capture
 #+BEGIN_SRC emacs-lisp
-  (defun fp/org-get-target-headline (&optional prompt)
-    "Prompt for a location in an org file and jump to it.
+      (defun fp/org-get-target-headline (&optional prompt)
+        "Prompt for a location in an org file and jump to it.
 
-  This is for promping for refile targets when doing captures."
-      (let* ((target (save-excursion
-                       (org-refile-get-location prompt nil nil t)))
-             (file (nth 1 target))
-             (pos (nth 3 target))
-             )
-      (with-current-buffer (find-file-noselect file)
-          (goto-char pos)
-          (org-end-of-subtree)
-          (org-return)
-      )))
-  ;;http://stackoverflow.com/questions/9005843/interactively-enter-headline-under-which-to-place-an-entry-using-capture
-  ;; http://emacs.stackexchange.com/questions/5923/org-capture-how-to-choose-the-target-file-at-the-end-of-the-process
-  (setq org-capture-templates
-        '(("t" "Todo item" entry (file+headline (concat org-directory "/refile.org") "todo")
-           "* %^{Title} %(org-set-tags)  \n:PROPERTIES:\n:Created: %U\n:END:\n%i\nBrief description:\n%?"
-           :created t
-           :empty-lines 1
-           :prepend t
-           )
+      This is for promping for refile targets when doing captures."
+          (let* ((target (save-excursion
+                           (org-refile-get-location prompt nil nil t)))
+                 (file (nth 1 target))
+                 (pos (nth 3 target))
+                 )
+          (with-current-buffer (find-file-noselect file)
+              (goto-char pos)
+              (org-end-of-subtree)
+              (org-return)
+          )))
+      ;;http://stackoverflow.com/questions/9005843/interactively-enter-headline-under-which-to-place-an-entry-using-capture
+      ;; http://emacs.stackexchange.com/questions/5923/org-capture-how-to-choose-the-target-file-at-the-end-of-the-process
+      (setq org-capture-templates
+            '(("t" "Todo item" entry (file+headline (concat org-directory "/refile.org") "todo")
+               "* %^{Title} %(org-set-tags)  \n:PROPERTIES:\n:Created: %U\n:END:\n%i\nBrief description:\n%?"
+               :created t
+               :empty-lines 1
+               :prepend t
+               )
 
-          ("a"               ; key
-           "Article"         ; name
-           entry             ; type
-           (file+headline (concat fp/dropbox-directory "/note/research.org") "Article")  ; target
-           "* %^{Title} %(org-set-tags)  :article: \n:PROPERTIES:\n:Created: %U\n:Linked: %A\n:END:\n%i\nBrief description:\n%?"  ; template
-           :prepend t        ; properties
-           :empty-lines 1    ; properties
-           :created t        ; properties
-           )
-        
-          ("j" "Journal entry"
-           entry (file+datetree (concat org-directory "/journal.org"))
-           "* %<%H:%M> %?"
-           :clock-in t :clock-resume t :empty-lines 1)
+              ("a"               ; key
+               "Article"         ; name
+               entry             ; type
+               (file+headline (concat fp/dropbox-directory "/note/research.org") "Article")  ; target
+               "* %^{Title} %(org-set-tags)  :article: \n:PROPERTIES:\n:Created: %U\n:Linked: %A\n:END:\n%i\nBrief description:\n%?"  ; template
+               :prepend t        ; properties
+               :empty-lines 1    ; properties
+               :created t        ; properties
+               )
+      
+              ("j" "Journal entry"
+               entry (file+datetree (concat org-directory "/journal.org"))
+               "* %<%H:%M> %?"
+               :clock-in t :clock-resume t :empty-lines 1)
 
-          ("n"               ; key
-           "Notes link"         ; name
-           entry             ; type
-           (file+function (concat org-directory "/notes.org") fp/org-get-target-headline)  ; target
-           "* %^{Title} %(org-set-tags)  :article: \n:PROPERTIES:\n:Created: %U\n:Linked: %A\n:END:\n%i\nBrief description:\n%?"  ; template
-           :prepend t        ; properties
-           :empty-lines 1    ; properties
-           :created t        ; properties
-           )
-          )
-        )
+              ("n"               ; key
+               "Notes link"         ; name
+               entry             ; type
+               (file+function (concat org-directory "/notes.org") fp/org-get-target-headline)  ; target
+               "* %^{Title} %(org-set-tags)  :article: \n:PROPERTIES:\n:Created: %U\n:Linked: %A\n:END:\n%i\nBrief description:\n%?"  ; template
+               :prepend t        ; properties
+               :empty-lines 1    ; properties
+               :created t        ; properties
+
+               ("x" "firefox" entry (file+headline (concat org-directory "/todo.org") "Firefox") "* TODO %c" :immediate-finish t)
+               )
+              )
+            )
 #+END_SRC
 
 #+RESULTS:
