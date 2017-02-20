@@ -369,9 +369,11 @@ Turn on auto-fill mode only for text mode.
     :after org
     :bind
     :config
-    (setq org-agenda-start-on-weekday t))
+    (setq org-agenda-start-on-weekday 1))
   ;;        org-agenda-diary-file (concat org-directory "/diary.org")))
 #+END_SRC
+
+#+RESULTS:
 
 ** Org-Journal
 
@@ -415,6 +417,8 @@ Let's make daily journal everyday and register them to agenda files.
     )
 #+END_SRC
 
+#+RESULTS:
+: t
 
 ** Org-download
 
@@ -555,6 +559,9 @@ Let's make daily journal everyday and register them to agenda files.
     (require 'ox-html))
 
 #+END_SRC
+
+#+RESULTS:
+
 ** Interleaved
 
 #+BEGIN_SRC emacs-lisp
