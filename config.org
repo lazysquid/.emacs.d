@@ -364,28 +364,57 @@ Turn on auto-fill mode only for text mode.
 | t | Todo item | entry | (file+headline (concat org-directory /refile.org) todo) | * %^{Title} %(org-set-tags) |
 
 ** Agenda
-
 #+BEGIN_SRC emacs-lisp
   (use-package org-agenda
     :after org
     :bind
     :config
-    (setq org-agenda-start-on-weekday t
-          org-agenda-diary-file (concat org-directory "/diary.org")))
+    (setq org-agenda-start-on-weekday t))
+  ;;        org-agenda-diary-file (concat org-directory "/diary.org")))
 #+END_SRC
 
 ** Org-Journal
 
 Let's make daily journal everyday and register them to agenda files.
+
 #+BEGIN_SRC emacs-lisp
   (use-package org-journal
     :ensure t
     :config
-    (setq org-journal-dir (concat org-directory "/daily-plan/"))
+    (defun get-journal-file-today ()
+      "Return filename for today's journal entry."
+      (let ((daily-name (format-time-string "%Y%m%d.org")))
+        (expand-file-name (concat org-journal-dir daily-name))))
+
+    (defun journal-file-today ()
+      "Create and load a journal file based on today's date."
+      (interactive)
+      (find-file (get-journal-file-today)))
+
+    (defun get-journal-file-yesterday ()
+      "Return filename for yesterday's journal entry."
+      (let* ((yesterday (time-subtract (current-time) (days-to-time 1)))
+             (daily-name (format-time-string "%Y%m%d.org" yesterday)))
+        (expand-file-name (concat org-journal-dir daily-name))))
+
+    (defun journal-file-yesterday ()
+      "Creates and load a file based on yesterday's date."
+      (interactive)
+      (find-file (get-journal-file-yesterday)))
     (setq org-agenda-files
           (append org-agenda-files
-                  (list (expand-file-name org-journal-dir)))))
+                  (list (get-journal-file-today))))
+
+    :init 
+    (setq org-journal-dir (concat org-directory "/journals/"))
+    (setq org-journal-file-format "%Y%m%d.org") 
+
+    ;; (setq org-agenda-files
+    ;;       (append org-agenda-files
+    ;;               (list (expand-file-name org-journal-dir))))
+    )
 #+END_SRC
+
 
 ** Org-download
 
@@ -737,12 +766,12 @@ http://endlessparentheses.com/embedding-youtube-videos-with-org-mode-links.html
       "r/" 'rtags-preprocess-file
       "rs" 'rtags-symbol-type
       "rc" 'rtags-rename-symbol
-    
-    
+
+
       ;; cmake-ide
       "cc" 'cmake-ide-compile
       "cv" 'cmake-ide-run-cmake
-    
+
       ;; Magit
       "mi" 'magit-init
       "ms" 'magit-status
@@ -751,6 +780,7 @@ http://endlessparentheses.com/embedding-youtube-videos-with-org-mode-links.html
       "osl" 'org-store-link
       "oc"  'org-capture
       "oa"  'org-agenda
+      "oj"  'org-journal-new-entry
 
 
       ;; Helm-ag key setup 
